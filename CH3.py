@@ -88,3 +88,73 @@ def psi(X, B):
         if x < B:
             count += 1
     return count
+
+
+def quadratic_sieve_illustrate(N, B, lower, upper):
+    """
+    illustrates the quadratic sieve for N using prime powers up to B
+    using values from F(lower) to F(upper), where F(T) = T^2 - N
+
+    the way that this function generates and uses prime powers
+    is not efficient
+    :param N:
+    :param B:
+    :param lower:
+    :param upper:
+    :return:
+    """
+    if B > 16:
+        return "not supported"
+    primes = [2, 3, 5, 7, 11, 13]
+    prime_powers = generate_prime_powers(B)
+    values = [t**2 - N for t in range(lower, upper + 1)]
+    print()
+    print(list_to_string([t for t in range(lower, upper+1)], 5))
+    print(list_to_string(values, 5))
+    for prime_power in prime_powers:
+        sieve_arrows = []
+        solutions = []  # solutions to t^2 = N (mod p^e)
+        n = N % prime_power
+        base_prime = prime_power
+        for prime in primes:
+            if prime_power % prime == 0:
+                base_prime = prime
+                break
+        for t in range(1, prime_power):
+            if t**2 % prime_power == n:
+                solutions.append(t)
+        if len(solutions) != 0:
+            for x in range(lower, upper + 1):
+                if (x % prime_power) in solutions:
+                    sieve_arrows.append("↓" + str(prime_power))
+                    values[x-lower] = int(values[x-lower]/prime)
+                else:
+                    sieve_arrows.append("")
+            print(list_to_string(sieve_arrows, 5))
+            print(list_to_string(values, 5))
+
+
+def list_to_string(lst, length):
+    return_string = ""
+    for item in lst:
+        return_string += str(item).rjust(length)
+    return return_string
+
+
+def generate_prime_powers(B):
+    primes = [2, 3, 5, 7, 11, 13]
+    if B > 16:
+        return "not supported"
+    prime_powers = []
+    index = 0
+    while primes[index] <= B:
+        p = primes[index]
+        while p <= B:
+            prime_powers.append(p)
+            p *= primes[index]
+        if index < len(primes)-1:
+            index += 1
+        else:
+            break
+    prime_powers.sort()
+    return prime_powers
