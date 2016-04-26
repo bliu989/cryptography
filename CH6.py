@@ -1,15 +1,18 @@
+import fractions
+
+
 def addFP(p, P1, P2, Q1, Q2, A=1):
     # (P1, P2) \oplus (Q1, Q2) over F_p
     # on the curve Y^2 = X^3 + AX + B
-    # (0,0) means the point at infinity
+    # (None, None) means the point at infinity
     if P1 == Q1 and P2 + Q2 == p:
-        return 0, 0
-    if P1 == P2 == 0:
-        if Q1 == Q2 == 0:
-            return 0, 0
+        return None, None
+    if P1 is P2 is None:
+        if Q1 is Q2 is None:
+            return None
         else:
             return Q1, Q2
-    if Q1 == Q2 == 0:
+    if Q1 is Q2 is None:
         return P1, P2
     if P1 == Q1 and P2 == Q2:
         slope = ((3*(P1**2) + A) * (inv(2*P2, p))) % p
@@ -23,7 +26,7 @@ def addFP(p, P1, P2, Q1, Q2, A=1):
 
 def find_points(p, A, B):
     # finds points in Y^2 = X^3 + AX + B over F_p
-    points = [(0, 0)]
+    points = [(None, None)]
     for x in range(0, p):
         right_side = (x**3 + A*x + B) % p
         ls = legendre_symbol(right_side, p)
@@ -65,3 +68,38 @@ def legendre_symbol(a, p):
         return -1
     else:
         return ls
+
+
+def double_and_add(n, a, b, N, A):
+    # P = (a, b)
+    # calculates nP mod N
+    P = (a, b)
+    Q = P
+    R = (None, None)
+    while n > 0:
+        if n % 2 == 1:
+            try:
+                R = addFP(N, R[0], R[1], Q[0], Q[1], A)
+            except TypeError:
+                return fractions.gcd((Q[0]-R[0]) % N, N)
+        Q = addFP(N, Q[0], Q[1], Q[0], Q[1], A)
+        n = int(n/2)
+    return R
+
+
+def lenstra_factor(N, a, b, A):
+    P = (a, b)
+    B = (b**2 - a**3 - A*a) % N
+    for j in range(2, 100):
+        P = double_and_add(j, P[0], P[1], N, A)
+        if isinstance(P, int):
+            if P < N:
+                return 'A factor of ' + str(N) + ' is ' + str(P)
+            else:
+                return 'failed'
+
+print(lenstra_factor(589,2,5,4))
+print(lenstra_factor(26167,2,12,4))
+print(lenstra_factor(1386493,1,1,3))
+print(lenstra_factor(28102844557,7,4,18))
+
