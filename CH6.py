@@ -73,6 +73,7 @@ def legendre_symbol(a, p):
 def double_and_add(n, a, b, N, A):
     # P = (a, b)
     # calculates nP mod N
+    # if fail, return a factor of N
     P = (a, b)
     Q = P
     R = (None, None)
@@ -89,7 +90,7 @@ def double_and_add(n, a, b, N, A):
 
 def lenstra_factor(N, a, b, A):
     P = (a, b)
-    B = (b**2 - a**3 - A*a) % N
+    # B = (b**2 - a**3 - A*a) % N
     for j in range(2, 100):
         P = double_and_add(j, P[0], P[1], N, A)
         if isinstance(P, int):
