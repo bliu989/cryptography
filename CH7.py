@@ -48,6 +48,25 @@ def NTRUE_encrypt(N, p, q, h, m, r):
     return e
 
 
+def NTRUE_decrypt(N, p, q, e, f, F):
+    a = poly_quot_mult(f, e, N, q)
+    center_a = center_lift(a, q)
+    m = poly_quot_mult(F, center_a, N, p)
+    m = center_lift(m, p)
+    return m
+
+
+def center_lift(P, q):
+    # center lift P from R_q to R
+    center = list(P)
+    N = len(P)
+    for k in range(N):
+        if center[k] > float(q/2):
+            center[k] -= q
+    center = tuple(center)
+    return center
+
+
 def poly_quot_mult(P1, P2, N, m):
     # multiply polynomials P1 and P2 in the quotient ring Z[x]/(N^2 + 1) mod m
     ans = [0 for x in range(N)]
@@ -68,7 +87,10 @@ print(poly_quot_mult((2,4,4,4,0,0,2), (1,0,3,0,2,0,0), 7, 5))
 print(poly_quot_mult((1,1,0,0,1), (1,0,1,1,0), 5, 2))
 
 
-print(NTRUE_encrypt(7,3,29,(3,14,-4,13,-6,2,7),(1,1,-1,-1,0,0,-1),(-1,0,1,0,0,-1,1)))
+bob_message = NTRUE_encrypt(7,3,29,(3,14,-4,13,-6,2,7),(1,1,-1,-1,0,0,-1),(-1,0,1,0,0,-1,1))
+print(bob_message)
+print(NTRUE_decrypt(7,3,29,bob_message,(-1,1,-1,0,1,0,1),(1,1,1,0,1,1,-1)))
+
 
 
 
